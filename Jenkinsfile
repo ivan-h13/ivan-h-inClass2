@@ -4,24 +4,34 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                    image 'node:22.17.0-alpine3.22'
+                    image 'node:22.14.0'
                     reuseNode true
                 }
             }
             steps {
-                sh'''
+                sh '''
                     ls -la
-                    node --version
-                    npm --version
+                    node -v
+                    npm -v
                     npm install
                     npm run build
                     ls -la
                 '''
             }
-    }
+        }
         stage('Test') {
-                steps{
-                    sh 'echo "test stage"'
+            agent {
+                docker {
+                    image 'node:22.14.0'
+                    reuseNode true
                 }
             }
+            steps {
+                sh '''
+                    test -f build/index.html
+                    npm test
+                '''
+            }
+        }
+    }
 }
